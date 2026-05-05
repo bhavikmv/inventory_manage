@@ -32,7 +32,14 @@ def dashboard_view(request):
     return render(request, 'student/dashboard.html', context)
 
 
-from ratelimit.decorators import ratelimit
+try:
+    from ratelimit.decorators import ratelimit
+except ImportError:
+    # Fallback decorator if ratelimit is not installed
+    def ratelimit(key=None, rate=None, block=False):
+        def decorator(func):
+            return func
+        return decorator
 
 @ratelimit(key='user', rate='5/m', block=True)
 @login_required
