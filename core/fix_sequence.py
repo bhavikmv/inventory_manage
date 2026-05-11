@@ -1,11 +1,14 @@
+from django.http import HttpResponse
 from django.db import connection
 
-with connection.cursor() as cursor:
-    cursor.execute("""
-        SELECT setval(
-            pg_get_serial_sequence('core_booking', 'id'),
-            (SELECT MAX(id) FROM core_booking)
-        );
-    """)
+def fix_sequence(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT setval(
+                pg_get_serial_sequence('core_booking', 'id'),
+                COALESCE((SELECT MAX(id) FROM core_booking), 1),
+                true
+            );
+        """)
 
-print("Booking sequence fixed successfully!")
+    return HttpResponse("Booking sequence fixed!")
